@@ -77,7 +77,8 @@ class PigpriceDetailSpider(scrapy.Spider):
         datePart = response.css("div.pt_tit::text").extract()
         priceDate = datePart[len(datePart) - 1]
 
-        parentPart = response.css("div.pt_tit em::text").extract_first().split('\n\t')[1].split('\t')
+        parentPart = response.css("div.pt_tit em::text").extract_first().split('\n\t')[
+            1].split('\t')
         parentName = parentPart[len(parentPart) - 1]
 
         districts = response.css('table tbody tr')
@@ -91,13 +92,9 @@ class PigpriceDetailSpider(scrapy.Spider):
                     "data": district.css("td span::text").extract(),
                 }
                 subData.append(item)
-                i = i + 1
-            '''
-            childrenLink = district.css("tr::attr(onclick)").extract_first().split('=')[1].split("'")[1]
-            if childrenLink is not None:
-                yield response.follow(childrenLink, callback=self.cityParse)
-            '''
-        
+
+            i = i + 1
+
         data = {
             "parentArea": parentName,
             "priceDate": priceDate,
@@ -110,38 +107,13 @@ class PigpriceDetailSpider(scrapy.Spider):
             "children": subData
         }
 
-        #将data输出到json文件中
+        # 将data输出到json文件中
         fileName = 'pigprice-%s-%s.json' % (priceDate, parentName)
-        with open(fileName, 'wt') as f:
-            f.write(json.dumps(data))
-    
-''' 
-    def cityParse(self, response):
- 
-        parentPart = response.css("div.pt_tit em::text").extract_first().split('\n\t')[1].split('\t')
-
-        parentName = parentPart[len(parentPart) - 1]
-        priceDate = response.css("div.pt_tit::text").extract_first()
-        districts = response.css('table tbody tr')
-        data = []
-        i = 0
-        while i < len(districts):
-            district = districts[i]
-
-            data.append({
-                "name": district.css("td::text")[0].extract(),
-                "data": district.css("td span::text").extract(),
-            })
-
-        #将data输出到json文件中
-        fileName = 'pigprice-%s-%s.json' % (parentName,priceDate)
         self.writeToFile(fileName, data)
 
- '''
-'''     def writeToFile(self, fileName, jsonable):
+    def writeToFile(self, fileName, jsonable):
         if os.path.exists(fileName):
             os.remove(fileName)
 
         with open(fileName, 'wt') as f:
             f.write(json.dumps(jsonable))
-         '''
