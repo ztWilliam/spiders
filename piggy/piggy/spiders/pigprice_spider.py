@@ -8,6 +8,7 @@ class PigpriceSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
+
         for district in response.css('table tbody tr'):
             yield {
                 'districtName': district.css("td::text")[0].extract(),
