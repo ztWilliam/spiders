@@ -74,6 +74,11 @@ class PigpriceDetailSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
+        dist = getattr(self, 'dist', '')
+        
+        if dist != '':
+            os.makedirs(dist, 0o777, True)
+
         datePart = response.css("div.pt_tit::text").extract()
         priceDate = datePart[len(datePart) - 1]
 
@@ -107,8 +112,11 @@ class PigpriceDetailSpider(scrapy.Spider):
             "children": subData
         }
 
-        # 将data输出到json文件中
-        fileName = 'pigprice-%s-%s.json' % (priceDate, parentName)
+        # 将data输出到json文件中, 若传入dist参数, 则将文件放到指定目录中
+        fileName = 'pigprice-%s-%s.json' % (priceDate, parentName) 
+        if dist != '':
+            fileName = dist + '/' + fileName
+
         self.writeToFile(fileName, data)
 
     def writeToFile(self, fileName, jsonable):
